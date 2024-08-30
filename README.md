@@ -1,13 +1,13 @@
 # To Do App ✅
 
-1. Create a new to do task. Set it's title and description:
-![Getting Started](./Screenshots/NewTodo.jpeg)
+1. Create a new to do task. Set its title and description:
+<img src="./Screenshots/NewTodo.jpeg" alt="Getting Started" width="300"/>
 
 2. The to do list. User can hit the checkbox to mark the task as complete:
-![Getting Started](./Screenshots/TodoList.jpeg)
+<img src="./Screenshots/TodoList.jpeg" alt="Getting Started" width="300"/>
 
 3. Edit existing task and save:
-![Getting Started](./Screenshots/EditTodo.jpeg)
+<img src="./Screenshots/EditTodo.jpeg" alt="Getting Started" width="300"/>
 
 ## Motivation
 
