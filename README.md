@@ -30,7 +30,7 @@ The ToDoApp is intended to store and track the user's tasks. The app is designed
    
 2. Navigate to the project directory:
     ```
-    cd Desserts
+    cd ToDoApp
     ```
     
 3. Open the project in Xcode:
