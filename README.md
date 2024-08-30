@@ -4,10 +4,10 @@
 ![Getting Started](./Screenshots/NewTodo.jpeg)
 
 2. The to do list. User can hit the checkbox to mark the task as complete:
-![Getting Started](./Screenshots/TodoList.jpg)
+![Getting Started](./Screenshots/TodoList.jpeg)
 
 3. Edit existing task and save:
-![Getting Started](./Screenshots/EditTodo.jpg)
+![Getting Started](./Screenshots/EditTodo.jpeg)
 
 ## Motivation
 
