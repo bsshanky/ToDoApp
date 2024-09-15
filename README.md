@@ -6,7 +6,13 @@
 2. The to do list. User can hit the checkbox to mark the task as complete:
 <img src="./Screenshots/TodoList.jpeg" alt="Getting Started" width="300"/>
 
-3. Edit existing task and save:
+3. User can filter their tasks based on completion status:
+<img src="./Screenshots/Filter.jpeg" alt="Getting Started" width="300"/>
+
+4. User can select and delete multiple tasks at once:
+<img src="./Screenshots/MassSelect.jpeg" alt="Getting Started" width="300"/>
+
+5. Edit existing task and save:
 <img src="./Screenshots/EditTodo.jpeg" alt="Getting Started" width="300"/>
 
 ## Motivation
@@ -39,7 +45,3 @@ The ToDoApp is intended to store and track the user's tasks. The app is designed
     ```
     
 4. Build and run the project on your chosen simulator or device.
-
-## Acknowledgements
-
-I would like to extend my sincere gratitude to the recruitment team at Airvet for providing me with this opportunity to work on this take-home assignment. It has been an invaluable learning experience.

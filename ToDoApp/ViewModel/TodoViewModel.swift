@@ -8,27 +8,53 @@
 import CoreData
 import Combine
 
-final class TodoViewModel: ObservableObject {
+enum TodoFilter {
+    case all
+    case completed
+    case incomplete
+}
+
+final class TodoViewModel: NSObject, ObservableObject {
     
     private let manager = CoreDataManager.shared
     @Published var todos: [ToDo] = []
-    private var cancellables = Set<AnyCancellable>()
 
-    
-    init() {
+    override init() {
+        super.init()
         fetchAllTodos()
     }
-
-    func fetchAllTodos() {
-            let request: NSFetchRequest<ToDo> = ToDo.fetchRequest()
-            request.sortDescriptors = [NSSortDescriptor(key: "createdOn", ascending: false)]
-            
-            do {
-                todos = try manager.persistentContainer.viewContext.fetch(request)
-            } catch {
-                print("Failed to fetch todos: \(error)")
-            }
+    
+    func fetchAllTodos(filter: TodoFilter = .all) {
+        let request: NSFetchRequest<ToDo> = ToDo.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(key: "createdOn", ascending: false)]
+        
+        switch filter {
+        case .completed:
+            request.predicate = NSPredicate(format: "completionStatus == %@", NSNumber(value: true))
+        case .incomplete:
+            request.predicate = NSPredicate(format: "completionStatus == %@", NSNumber(value: false))
+        case .all:
+            request.predicate = nil
         }
+        
+        do {
+            todos = try manager.context.fetch(request)
+        } catch {
+            print("Failed to fetch todos: \(error)")
+        }
+    }
+
+
+//    func fetchAllTodos() {
+//            let request: NSFetchRequest<ToDo> = ToDo.fetchRequest()
+//            request.sortDescriptors = [NSSortDescriptor(key: "createdOn", ascending: false)]
+//            
+//            do {
+//                todos = try manager.persistentContainer.viewContext.fetch(request)
+//            } catch {
+//                print("Failed to fetch todos: \(error)")
+//            }
+//        }
 
     func addNewTodo(title: String, description: String) {
         
@@ -66,17 +92,6 @@ final class TodoViewModel: ObservableObject {
         }
     }
 
-    func saveContext() {
-        if manager.context.hasChanges {
-            do  {
-                try manager.context.save()
-            } catch {
-                let nserror = error as NSError
-                print("Error saving the staged changes \(nserror), \(nserror.userInfo)")
-            }
-        }
-    }
-
     func toggleCompletionStatus(id: UUID) {
         let fetchRequest: NSFetchRequest<ToDo> = ToDo.fetchRequest()
         let predicate = NSPredicate(format: "id=%@", id.uuidString)
@@ -107,6 +122,35 @@ final class TodoViewModel: ObservableObject {
             fetchAllTodos()
         } catch let error {
             print(error.localizedDescription)
+        }
+    }
+    
+    func deleteTodos(ids: [UUID]) {
+        let fetchRequest: NSFetchRequest<ToDo> = ToDo.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id IN %@", ids.map { $0.uuidString })
+        
+        do {
+            let fetchedTodos = try manager.context.fetch(fetchRequest)
+            
+            for todo in fetchedTodos {
+                manager.context.delete(todo)
+            }
+                            
+            saveContext()
+            fetchAllTodos()
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+
+    func saveContext() {
+        if manager.context.hasChanges {
+            do  {
+                try manager.context.save()
+            } catch {
+                let nserror = error as NSError
+                print("Error saving the staged changes \(nserror), \(nserror.userInfo)")
+            }
         }
     }
 }

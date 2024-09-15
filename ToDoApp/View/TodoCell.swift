@@ -71,7 +71,7 @@ class TodoCell: UITableViewCell {
     }
     
     func setupView() {
-        selectionStyle = .none
+        selectionStyle = .default
         
         contentView.addSubview(checkboxButton)
         contentView.addSubview(titleLabel)

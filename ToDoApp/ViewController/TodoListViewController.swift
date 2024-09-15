@@ -12,6 +12,7 @@ class TodoListViewController: UIViewController {
     
     let viewModel = TodoViewModel()
     private var cancellables = Set<AnyCancellable>()
+    var isSelecting = false
     
     lazy var tableView: UITableView = {
         let v = UITableView()
@@ -27,11 +28,12 @@ class TodoListViewController: UIViewController {
         view.backgroundColor = UIColor.systemBackground
         title = "ToDo List"
         navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewTodo))
-        
+        setupBarButtons()
+
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(TodoCell.self, forCellReuseIdentifier: "TodoCell")
+        tableView.allowsMultipleSelectionDuringEditing = true
         
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
@@ -44,6 +46,18 @@ class TodoListViewController: UIViewController {
         bindViewModel()
     }
     
+    private func setupBarButtons() {
+        navigationItem.rightBarButtonItems = [UIBarButtonItem(title: "", image: UIImage(systemName: "line.horizontal.3.decrease.circle"), target: self, action: #selector(filterTodoItems)), UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewTodo))]
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(selectMultipleCells))
+    }
+    
+    private func setupDeleteAndCancelButtons() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelSelection))
+        navigationItem.rightBarButtonItems = [UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(deleteSelectedTodos)),]
+    }
+
+
     private func bindViewModel() {
         viewModel.$todos
             .receive(on: DispatchQueue.main)
@@ -62,8 +76,61 @@ class TodoListViewController: UIViewController {
         present(navigationController, animated: true, completion: nil)
     }
     
+    @objc func filterTodoItems() {
+        let actionSheet = UIAlertController(title: "Filter ToDo Items", message: "Select a filter", preferredStyle: .actionSheet)
+        
+        let allAction = UIAlertAction(title: "All", style: .default) { [weak self] _ in
+            self?.viewModel.fetchAllTodos(filter: .all)
+        }
+        
+        let incompleteAction = UIAlertAction(title: "Incomplete", style: .default) { [weak self] _ in
+            self?.viewModel.fetchAllTodos(filter: .incomplete)
+        }
+        
+        let completeAction = UIAlertAction(title: "Complete", style: .default) { [weak self] _ in
+            self?.viewModel.fetchAllTodos(filter: .completed)
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        actionSheet.addAction(allAction)
+        actionSheet.addAction(incompleteAction)
+        actionSheet.addAction(completeAction)
+        actionSheet.addAction(cancelAction)
+        
+        present(actionSheet, animated: true, completion: nil)
+    }
+    
     @objc func addNewTodo() {
         presentAddTodoViewController(with: nil)
+    }
+    
+    @objc func selectMultipleCells() {
+        isSelecting = true
+        tableView.setEditing(true, animated: true)
+        setupDeleteAndCancelButtons() // Update buttons to Delete and Cancel
+    }
+    
+    @objc func cancelSelection() {
+        isSelecting = false
+        tableView.setEditing(false, animated: true)
+        setupBarButtons() // Restore the original buttons
+    }
+
+    @objc func deleteSelectedTodos() {
+        guard let selectedRows = tableView.indexPathsForSelectedRows else { return }
+            
+        // Map the selected rows to corresponding ToDo ids
+        let idsToDelete = selectedRows.compactMap { indexPath -> UUID? in
+            let todo = viewModel.todos[indexPath.row]
+            return todo.id
+        }
+        
+        // Call the viewModel's deleteTodos function with the selected ids
+        viewModel.deleteTodos(ids: idsToDelete)
+        
+        // Exit selection mode after deletion
+        cancelSelection()
     }
 }
 
